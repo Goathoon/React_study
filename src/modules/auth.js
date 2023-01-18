@@ -1,11 +1,42 @@
 import {createAction,handleActions} from 'redux-actions';
-const SAMPLE_ACTION = 'auth/SAMPLE_ACTION'; //auth 모듈 안에 SAMPLE_ACTION이라는 액션타입이 존재한다.(관습적인 룰)
-export const sampleAction = createAction(SAMPLE_ACTION);
-const initialState = {};
+import produce from 'immer';
+
+const CHANGE_FIELD = 'auth/CHANGE_FIELD';
+const INITIALIZE_FORM = 'auth/INITIALIZE_FORM';
+
+export const changeField = createAction(
+    CHANGE_FIELD,
+    ({form,key,value}) =>({
+        form, //register, login
+        key, //username, password, passwordConfirm
+        value, //실제 바꾸려는 값
+    }),
+);
+
+export const initializeForm = createAction(INITIALIZE_FORM,form=>form); //register/login
+
+const initialState = {
+    register :{
+        username:'',
+        password:'',
+        passwordConfirm:'',
+    },
+    login:{
+        username:'',
+        password:'',
+    },
+};
 
 const auth = handleActions(
     {
-        [SAMPLE_ACTION]:(state,action)=>state,
+        [CHANGE_FIELD]: (state,{payload:{form,key,value}})=>
+            produce(state,draft=>{
+                draft[form][key] = value; // 예:state.register.username을 바꾼다.
+            }),
+        [INITIALIZE_FORM]:(state,{payload:form})=>({
+            ...state,
+            [form]:initialState[form],
+        }),
     },
     initialState,
 );
